@@ -58,3 +58,11 @@ Optimization and Performance Considerations:
    - Used buffered output (via `std::ofstream`) to minimize I/O overhead.
    - Ensured consistent fixed-point precision for price formatting (to match `mbp.csv`).
 
+Things to be aware of:
+--------------------------------------
+Orders with unknown sides or malformed rows are skipped silently to ensure robustness. The unit tests simulate a variety of realistic scenarios, including order additions, cancellations, and edge cases such as complete level depletion. The implementation ensures strict bid-side descending and ask-side ascending ordering at each depth level.
+
+Takeaways and limitations:
+-------------------------
+While the current approach is efficient for processing up to approximately 10 million events, future scalability could benefit from enhancements like preallocating memory for price levels or bypassing stringstream overhead by writing directly to preformatted character buffers. Additionally, although the implementation currently handles one symbol at a time, the output writing could be parallelized to support multi symbol order books in future expansions. I prioritized clarity and safety by using standard containers and avoiding low level pointer manipulation or custom allocators. One area for improvement could be enhanced parsing resilience, such as incorporating fallback modes or logging malformed rows for further inspection instead of silently skipping them.
+

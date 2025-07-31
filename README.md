@@ -1,5 +1,3 @@
-README.txt
-
 Order Book Reconstruction from MBO to MBP-10
 ============================================
 

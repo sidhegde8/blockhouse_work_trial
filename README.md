@@ -12,15 +12,22 @@ The final output is a CSV named `output.csv` that mimics the structure of `mbp.c
 Usage:
 ------
 To build:
+```sh
     make
-
+```
 To run:
-    ./reconstruction_<yourname> mbo.csv
+```sh
+    ./reconstruction.exe mbo.csv
+```
 
 To run unit tests:
+```sh
     make test
+```
 
 To clean up:
+```sh
     make clean
+```
 
 

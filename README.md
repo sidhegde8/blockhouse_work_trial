@@ -30,4 +30,31 @@ To clean up:
     make clean
 ```
 
+Optimization and Performance Considerations:
+--------------------------------------------
+1. **Efficient Price-Level Tracking**:
+   - Used `std::map<double, std::set<long>>` for both `bids` and `asks`.
+   - Bid map is sorted in **descending** order (`std::greater<double>`) to prioritize higher prices.
+   - Ask map uses default ascending order to prioritize lower prices.
+   - This enables O(log N) insertions, deletions, and fast access to top levels.
+
+2. **Fast Order Lookup**:
+   - Maintained an `order_id → (side, price, size)` hash table for O(1) retrieval during cancellations and modifications.
+   - This avoids scanning the entire book during each event.
+
+3. **Minimized Redundant Work**:
+   - Only emitted top 10 levels at each update to avoid unnecessary formatting or extra copying.
+   - Cached and reused stringstream buffers where applicable.
+
+4. **Avoided Overhead from Unnecessary Copies**:
+   - Passed large structures (like vectors or strings) by reference where possible.
+   - Used `emplace` over `insert` to avoid temporary construction.
+
+5. **Clean Separation of Logic**:
+   - Parsing, order handling, and output logic are modular.
+   - Unit tests target the `OrderBook` class in isolation.
+
+6. **I/O Throughput Considerations**:
+   - Used buffered output (via `std::ofstream`) to minimize I/O overhead.
+   - Ensured consistent fixed-point precision for price formatting (to match `mbp.csv`).
 

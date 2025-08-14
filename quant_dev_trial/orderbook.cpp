@@ -3,19 +3,24 @@
 #include <iostream>
 #include <iomanip>
 
+
+// Adds a new order to the order book and maps it to the order ID.
 void OrderBook::add_order(double price, int size, char side, long order_id) {
     if (side == 'B') {
         bids[price].insert(order_id);
     } else if (side == 'A') {
         asks[price].insert(order_id);
     }
-    order_map[order_id] = {price, side};
+    order_map[order_id] = {price, side, size};
 }
 
+// Cancels an order by removing it from the order book and the order map.
 void OrderBook::cancel_order(long order_id, char side) {
     if (order_map.find(order_id) == order_map.end()) return;
 
-    auto [price, stored_side] = order_map[order_id];
+    auto& info = order_map[order_id];
+    double price = info.price;
+    char stored_side = info.side;
 
     if (stored_side == 'B') {
         auto it = bids.find(price);
@@ -34,32 +39,8 @@ void OrderBook::cancel_order(long order_id, char side) {
     order_map.erase(order_id);
 }
 
+// Retireves the top N levels of the orderbook
 std::vector<std::string> OrderBook::get_top_levels(const std::string& ts_event, int depth) {
-    std::vector<std::string> row;
-    row.push_back(ts_event);
-
-    int count = 0;
-    for (auto it = bids.begin(); it != bids.end() && count < depth; ++it, ++count) {
-        row.push_back(std::to_string(it->first));
-        row.push_back(std::to_string(it->second.size() * 100));  // assume size 100 per order
-        row.push_back(std::to_string(it->second.size()));
-    }
-    while (count++ < depth) {
-        row.push_back(""); row.push_back(""); row.push_back("");
-    }
-
-    count = 0;
-    for (auto it = asks.begin(); it != asks.end() && count < depth; ++it, ++count) {
-        row.push_back(std::to_string(it->first));
-        row.push_back(std::to_string(it->second.size() * 100));
-        row.push_back(std::to_string(it->second.size()));
-    }
-    while (count++ < depth) {
-        row.push_back(""); row.push_back(""); row.push_back("");
-    }
-
-    return row;
-}std::vector<std::string> OrderBook::get_top_levels(const std::string& ts_event, int depth) {
     std::vector<std::string> row;
     row.push_back(ts_event);
 
@@ -68,8 +49,12 @@ std::vector<std::string> OrderBook::get_top_levels(const std::string& ts_event, 
     int bid_count = 0, ask_count = 0;
 
     for (auto it = bids.begin(); it != bids.end() && bid_count < depth; ++it, ++bid_count) {
+        int total_size = 0;
+        for (auto order_id : it->second) {
+            total_size += order_map[order_id].size;
+        }
         bid_data.push_back(std::to_string(it->first));
-        bid_data.push_back(std::to_string(it->second.size() * 100));
+        bid_data.push_back(std::to_string(total_size));
         bid_data.push_back(std::to_string(it->second.size()));
     }
     while (bid_count++ < depth) {
@@ -77,8 +62,12 @@ std::vector<std::string> OrderBook::get_top_levels(const std::string& ts_event, 
     }
 
     for (auto it = asks.begin(); it != asks.end() && ask_count < depth; ++it, ++ask_count) {
+        int total_size = 0;
+        for (auto order_id : it->second) {
+            total_size += order_map[order_id].size;
+        }
         ask_data.push_back(std::to_string(it->first));
-        ask_data.push_back(std::to_string(it->second.size() * 100));
+        ask_data.push_back(std::to_string(total_size));
         ask_data.push_back(std::to_string(it->second.size()));
     }
     while (ask_count++ < depth) {

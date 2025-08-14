@@ -59,6 +59,42 @@ std::vector<std::string> OrderBook::get_top_levels(const std::string& ts_event, 
     }
 
     return row;
+}std::vector<std::string> OrderBook::get_top_levels(const std::string& ts_event, int depth) {
+    std::vector<std::string> row;
+    row.push_back(ts_event);
+
+    // Prepare bid and ask vectors
+    std::vector<std::string> bid_data, ask_data;
+    int bid_count = 0, ask_count = 0;
+
+    for (auto it = bids.begin(); it != bids.end() && bid_count < depth; ++it, ++bid_count) {
+        bid_data.push_back(std::to_string(it->first));
+        bid_data.push_back(std::to_string(it->second.size() * 100));
+        bid_data.push_back(std::to_string(it->second.size()));
+    }
+    while (bid_count++ < depth) {
+        bid_data.push_back(""); bid_data.push_back(""); bid_data.push_back("");
+    }
+
+    for (auto it = asks.begin(); it != asks.end() && ask_count < depth; ++it, ++ask_count) {
+        ask_data.push_back(std::to_string(it->first));
+        ask_data.push_back(std::to_string(it->second.size() * 100));
+        ask_data.push_back(std::to_string(it->second.size()));
+    }
+    while (ask_count++ < depth) {
+        ask_data.push_back(""); ask_data.push_back(""); ask_data.push_back("");
+    }
+
+    for (int i = 0; i < depth; ++i) {
+        row.push_back(bid_data[i * 3]);
+        row.push_back(bid_data[i * 3 + 1]);
+        row.push_back(bid_data[i * 3 + 2]);
+        row.push_back(ask_data[i * 3]);
+        row.push_back(ask_data[i * 3 + 1]);
+        row.push_back(ask_data[i * 3 + 2]);
+    }
+
+    return row;
 }
 
 void OrderBook::process_lines(const std::vector<std::string>& lines, std::ofstream& out) {

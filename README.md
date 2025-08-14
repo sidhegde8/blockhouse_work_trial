@@ -21,6 +21,7 @@ To run:
 To run unit tests:
 ```sh
     make test
+    ./test.exe
 ```
 
 To clean up:
